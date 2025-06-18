@@ -1,5 +1,10 @@
 streamlit
+numpy
 pandas
+scikit-learn
+fonttools
 requests
 scikit-learn
 matplotlib
+seaborn
+pillow
