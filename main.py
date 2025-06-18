@@ -1,10 +1,14 @@
 import streamlit as st
-import layout
-import logisticstime
-import workdayai
 
-# 페이지 기본 설정
+# 페이지 설정은 반드시 최상단
 st.set_page_config(page_title="공사 예측 시스템", layout="wide")
+
+# 모듈 import
+import layout
+from logisticstime import run_logisticstime
+from workdayai import run_workdayai
+
+
 
 # 공통 CSS 및 레이아웃 로드
 layout.load_css()
