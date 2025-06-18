@@ -1,22 +1,17 @@
 import streamlit as st
-
-# 페이지 설정은 반드시 최상단
-st.set_page_config(page_title="공사 예측 시스템", layout="wide")
-
-# 모듈 import
 import layout
 from logisticstime import run_logisticstime
 from workdayai import run_workdayai
 
-
+# 페이지 설정은 반드시 최상단
+st.set_page_config(page_title="공사 예측 시스템", layout="wide")
 
 # 공통 CSS 및 레이아웃 로드
 layout.load_css()
 layout.header()
 
-# URL 파라미터에서 page 값 가져오기
-query_params = st.query_params
-page = query_params.get("page", ["home"])[0]
+query_params = st.query_params  # 올바른 사용 방식
+page = query_params.get("page", "home")
 
 # 라우팅
 if page == "logistic":
