@@ -25,23 +25,11 @@ plt.rcParams['axes.unicode_minus'] = False
 # 2. 데이터 불러오기
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data_logistics.csv")
-    df = df.rename(columns={"현장명": "프로젝트명"})
-    return df
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, "data_logistics.csv")
+    return pd.read_csv(csv_path)
 
 df_data = load_data()
-
-st.markdown(
-    """
-    <div style="text-align: center; margin-bottom: 5px;">
-        <img src="https://raw.githubusercontent.com/khj1637/dw-workday-ai/main/img/logo.png"
-             alt="DongwonCI"
-             width="180"
-             style="display: block; margin: auto; padding-bottom: 5px;">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 st.markdown(
     """
