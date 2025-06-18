@@ -11,8 +11,8 @@ def header():
             <img src="https://raw.githubusercontent.com/khj1637/dw-workday-ai/main/img/logo.png" width="140">
         </div>
         <div class="menu-area">
-            <a href="/?page=logistic" class="menu-item">물류센터 공기예측</a>
-            <a href="/?page=workday" class="menu-item">공사가동률 계산</a>
+            <a href="/?page=logistic" class="menu-item" target="_self">물류센터 공기예측</a>
+            <a href="/?page=workday" class="menu-item" target="_self">공사가동률 계산</a>
         </div>
     </div>
     <div style="margin-top: 140px;"></div>
