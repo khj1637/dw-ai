@@ -2,8 +2,8 @@ import streamlit as st
 # 페이지 기본 설정 (파일 제일 상단에 위치해야 함)
 st.set_page_config(page_title="공사 예측 시스템", layout="wide")
 import layout
-import logisticstime
-import workdayai
+from logisticstime import app as logistic_app
+from workdayai import app as workday_app
 
 # 페이지 기본 설정 (파일 제일 상단에 위치해야 함)
 st.set_page_config(page_title="공사 예측 시스템", layout="wide")
