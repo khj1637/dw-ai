@@ -10,11 +10,11 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.patches import Wedge
 import os
 
-def run_workdayai():
-    st.subheader("📅 공사 가동률 계산기")
 def app():
     layout.load_css()
     layout.header()
+
+    st.title("공사가동률 계산기")
 
 percent_font = FontProperties(fname="fonts/NanumBarunGothicBold.ttf")
 
