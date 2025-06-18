@@ -10,7 +10,7 @@ layout.load_css()
 layout.header()
 
 # URL 파라미터로 페이지 구분
-query_params = st.query_params
+query_params = st.experimental_get_query_params()
 page = query_params.get("page", ["home"])[0]
 
 # 페이지 라우팅
