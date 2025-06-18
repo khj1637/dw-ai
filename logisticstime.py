@@ -8,6 +8,7 @@ import base64
 import streamlit.components.v1 as components
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+import os
 from PIL import Image
 from io import BytesIO
 from sklearn.impute import KNNImputer
