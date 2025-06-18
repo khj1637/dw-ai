@@ -21,6 +21,7 @@ def app():
     layout.load_css()
     layout.header()
     st.title("물류센터 공사기간 예측기")
+    layout.footer()
 
 # 폰트 설정
 font_path = "./fonts/NanumGothic.ttf"
@@ -436,5 +437,3 @@ if st.button("예측 시작", use_container_width=True):
         st.markdown("📌 **참조된 유사 프로젝트**는 입력 조건과 범주형 항목이 일치한 실제 사례들입니다.")
     else:
         st.warning("⚠️ 유사 프로젝트를 찾을 수 없습니다. 입력값을 다시 확인해 주세요.")
-
-    layout.footer()
