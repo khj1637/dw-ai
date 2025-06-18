@@ -1,23 +1,26 @@
 import streamlit as st
-st.set_page_config(page_title="공사 예측 시스템", layout="wide")  # 가장 먼저 실행
-
 import layout
 import logisticstime
 import workdayai
 
+# 페이지 기본 설정 (파일 제일 상단에 위치해야 함)
+st.set_page_config(page_title="공사 예측 시스템", layout="wide")
+
+# 스타일 및 레이아웃 불러오기
 layout.load_css()
 layout.header()
 
-# 쿼리 파라미터에서 page 선택
-page = st.query_params.get("page", "home")
+# URL 파라미터로 페이지 구분
+query_params = st.query_params
+page = query_params.get("page", ["home"])[0]
 
-# 해당 앱 실행
+# 페이지 라우팅
 if page == "logistic":
     logisticstime.app()
 elif page == "workday":
     workdayai.app()
 else:
-    st.title("공사 예측 시스템 메인")
-    st.write("왼쪽 메뉴 또는 상단 메뉴에서 기능을 선택하세요.")
+    st.title("공사 예측 시스템 메인 페이지")
+    st.markdown("원하는 기능을 상단 메뉴에서 선택하세요.")
 
 layout.footer()
