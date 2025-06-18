@@ -2,6 +2,7 @@ import pandas as pd
 import datetime
 import requests
 import streamlit as st
+import layout
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import matplotlib.transforms as mtransforms
@@ -9,6 +10,9 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.patches import Wedge
 import os
 
+def app():
+    layout.load_css()
+    layout.header()
 
 percent_font = FontProperties(fname="fonts/NanumBarunGothicBold.ttf")
 
@@ -376,3 +380,5 @@ if st.button("📊 예측 실행", use_container_width=True):
         -  **시각화된 원형 그래프 제공**: 휴일 기반 / 날씨 기반 / 종합 가동률을 시각적으로 비교할 수 있도록 디자인된 차트가 함께 제공됩니다.
         -  사용자에게 **계산의 기준**과 **반영된 공휴일 리스트**를 **자동 출력**하여, **결과 해석 및 누락**에 대한 **보완**이 가능이 가능합니다.
         """)
+
+    layout.footer()
