@@ -27,11 +27,20 @@ plt.rcParams['font.family'] = fontprop.get_name()
 plt.rcParams['axes.unicode_minus'] = False
 
 # 2. 데이터 불러오기
+#@st.cache_data
+#def load_data():
+#    base_dir = os.path.dirname(os.path.abspath(__file__))
+#    csv_path = os.path.join(base_dir, "data_logistics.csv")
+#    return pd.read_csv(csv_path)
+
 @st.cache_data
 def load_data():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(base_dir, "data_logistics.csv")
-    return pd.read_csv(csv_path)
+    # __file__ 대신 현재 디렉토리 기준 경로로 처리
+    base_dir = os.getcwd()
+    file_path = os.path.join(base_dir, "data_logistics.csv")  # 예시 파일명
+    df = pd.read_csv(file_path)
+    df = df.rename(columns={"현장명": "프로젝트명"})
+    return df
 
 df_data = load_data()
 
