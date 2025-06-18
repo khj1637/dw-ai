@@ -22,6 +22,7 @@ def run_logisticstime():
 def app():
     layout.load_css()
     layout.header()
+    st.title("물류센터 공사기간 예측기")
 
 # 폰트 설정
 font_path = "./fonts/NanumGothic.ttf"
