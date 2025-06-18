@@ -17,8 +17,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.preprocessing import RobustScaler
 
-def run_logisticstime():
-    st.subheader("📦 물류센터 공사기간 예측기")
 def app():
     layout.load_css()
     layout.header()
