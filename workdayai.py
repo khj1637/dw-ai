@@ -219,18 +219,6 @@ def predict_non_working_days(start_date, end_date, sido, sigungu, lat, lon, year
 # 4. UI
 st.markdown(
     """
-    <div style="text-align: center; margin-bottom: 5px;">
-        <img src="https://raw.githubusercontent.com/khj1637/dw-workday-ai/main/img/logo.png"
-             alt="DongwonCI"
-             width="180"
-             style="display: block; margin: auto; padding-bottom: 5px;">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
     <h1 style='text-align: center;'>공사가동률 계산기</h1>
     <div style='height: 20px;'></div>  <!-- 공백 한 줄 -->
     <p style='text-align: left; font-size: 0.85rem; color: #555;'>
