@@ -1,5 +1,6 @@
 # 1. 라이브러리 및 설정
 import streamlit as st
+import layout
 import numpy as np
 import pandas as pd
 import re
@@ -15,6 +16,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.preprocessing import RobustScaler
 
+def app():
+    layout.load_css()
+    layout.header()
 
 # 폰트 설정
 font_path = "./fonts/NanumGothic.ttf"
@@ -421,3 +425,5 @@ if st.button("예측 시작", use_container_width=True):
         st.markdown("📌 **참조된 유사 프로젝트**는 입력 조건과 범주형 항목이 일치한 실제 사례들입니다.")
     else:
         st.warning("⚠️ 유사 프로젝트를 찾을 수 없습니다. 입력값을 다시 확인해 주세요.")
+
+    layout.footer()
