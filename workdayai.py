@@ -10,6 +10,7 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.patches import Wedge
 import os
 
+def run_workdayai():
 def app():
     layout.load_css()
     layout.header()
