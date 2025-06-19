@@ -5,7 +5,6 @@ from modules.input_forms import (
     render_duration_form,
     render_etc_form
 )
-from modules.gpt_viewer import render_gpt_viewer  # ✅ 자동 챗봇 등록 흐름
 
 # ✅ Google Sheets 문서명
 SHEET_NAME = "knowledge_db"
