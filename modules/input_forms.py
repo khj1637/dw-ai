@@ -86,58 +86,62 @@ def render_ve_form(sheet_name, worksheet_name):
 
 # 📅 공사기간 입력 폼
 def render_duration_form(sheet_name, worksheet_name):
-    st.subheader("공사기간 입력")
-    with st.form("form_duration"):
+    st.subheader("📅 공사기간 입력")
+    with st.form(key="duration_form"):
         project = st.text_input("현장명", key="duration_project")
         usage = st.text_input("용도", key="duration_usage")
         structure = st.text_input("구조형식", key="duration_structure")
-        land_area = st.number_input("대지면적 (㎡)", min_value=0.0, key="land_area")
-        building_area = st.number_input("건축면적 (㎡)", min_value=0.0, key="building_area")
-        total_floor_area = st.number_input("연면적 (㎡)", min_value=0.0, key="total_area")
-        above_ground = st.number_input("지상층수", min_value=0, step=1, key="above_ground")
-        underground = st.number_input("지하층수", min_value=0, step=1, key="underground")
-        height = st.number_input("최고높이 (m)", min_value=0.0, key="height")
-        duration = st.number_input("전체 공사기간 (일)", min_value=0, step=1, key="duration")
+        land_area = st.number_input("대지면적 (㎡)", min_value=0.0, key="duration_land_area")
+        building_area = st.number_input("건축면적 (㎡)", min_value=0.0, key="duration_building_area")
+        total_floor_area = st.number_input("연면적 (㎡)", min_value=0.0, key="duration_total_floor_area")
+        above_ground = st.number_input("지상층수", min_value=0, step=1, key="duration_above_ground")
+        underground = st.number_input("지하층수", min_value=0, step=1, key="duration_underground")
+        height = st.number_input("최고높이 (m)", min_value=0.0, key="duration_height")
+        duration = st.number_input("전체 공사기간 (일)", min_value=1, step=1, key="duration_duration")
 
-        submitted = st.form_submit_button("저장하기", key="duration_submit")
-        if submitted:
-            if not all([project, usage, structure]) or duration == 0:
-                st.error("❌ 필수 항목을 모두 입력해 주세요.")
-            else:
-                new_data = {
-                    "project": project,
-                    "usage": usage,
-                    "structure": structure,
-                    "land_area": land_area,
-                    "building_area": building_area,
-                    "total_floor_area": total_floor_area,
-                    "above_ground": above_ground,
-                    "underground": underground,
-                    "height": height,
-                    "duration": duration
-                }
-                save_to_sheet(sheet_name, worksheet_name, new_data)
-                st.success("✅ 공사기간 데이터가 저장되었습니다.")
+        submitted = st.form_submit_button("저장하기")  # key 제거 or 고유한 값으로
+
+    if submitted:
+        if not all([project, usage, structure]):
+            st.error("❌ 필수 항목을 모두 입력해 주세요.")
+        else:
+            new_data = {
+                "project": project,
+                "usage": usage,
+                "structure": structure,
+                "land_area": land_area,
+                "building_area": building_area,
+                "total_floor_area": total_floor_area,
+                "above_ground": above_ground,
+                "underground": underground,
+                "height": height,
+                "duration": duration
+            }
+            save_to_sheet(sheet_name, worksheet_name, new_data)
+            st.success("✅ 공사기간 데이터가 저장되었습니다.")
+
 
 # 📁 기타사례 입력 폼
 def render_etc_form(sheet_name, worksheet_name):
-    st.subheader("기타사례 입력")
-    with st.form("form_etc"):
+    st.subheader("📁 기타사례 입력")
+    with st.form(key="etc_form"):
         project = st.text_input("현장명", key="etc_project")
         date_val = st.date_input("등록일", key="etc_date")
         etc_content = st.text_input("관련 내용", key="etc_content")
         details = st.text_area("상세 내용", key="etc_details")
 
-        submitted = st.form_submit_button("저장하기", key="etc_submit")
-        if submitted:
-            if not all([project, etc_content, details]):
-                st.error("❌ 모든 항목을 입력해 주세요.")
-            else:
-                new_data = {
-                    "project": project,
-                    "date": date_val.strftime("%Y-%m-%d"),
-                    "etc_content": etc_content,
-                    "details": details
-                }
-                save_to_sheet(sheet_name, worksheet_name, new_data)
-                st.success("✅ 기타사례가 저장되었습니다.")
+        submitted = st.form_submit_button("저장하기")  # 🔑 key 제거하여 충돌 방지
+
+    if submitted:
+        if not all([project, etc_content, details]):
+            st.error("❌ 모든 항목을 입력해 주세요.")
+        else:
+            new_data = {
+                "project": project,
+                "date": date_val.strftime("%Y-%m-%d"),
+                "etc_content": etc_content,
+                "details": details
+            }
+            save_to_sheet(sheet_name, worksheet_name, new_data)
+            st.success("✅ 기타사례가 저장되었습니다.")
+
