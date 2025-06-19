@@ -44,8 +44,8 @@ def render_defect_form(sheet_name, worksheet_name):
 
 # 💡 VE사례 입력 폼
 def render_ve_form(sheet_name, worksheet_name):
-    st.subheader("VE사례 입력")
-    with st.form("form_ve"):
+    st.subheader("💡 VE사례 입력")
+    with st.form(key="ve_form"):
         project = st.text_input("현장명", key="ve_project")
         date_val = st.date_input("적용일", key="ve_date")
         work_type = st.text_input("공종", key="ve_work_type")
@@ -60,27 +60,29 @@ def render_ve_form(sheet_name, worksheet_name):
         else:
             fail_reason = st.text_input("실패 원인", key="ve_fail_reason")
 
-        submitted = st.form_submit_button("저장하기", key="ve_submit")
-        if submitted:
-            if not all([project, work_type, ve_content, details]):
-                st.error("❌ 모든 항목을 입력해 주세요.")
-            elif result == "성공사례" and not effect:
-                st.error("❌ '절감 효과 / 개선점'을 입력해 주세요.")
-            elif result == "실패사례" and not fail_reason:
-                st.error("❌ '실패 원인'을 입력해 주세요.")
-            else:
-                new_data = {
-                    "project": project,
-                    "date": date_val.strftime("%Y-%m-%d"),
-                    "work_type": work_type,
-                    "result": result,
-                    "ve_content": ve_content,
-                    "details": details,
-                    "effect": effect,
-                    "fail_reason": fail_reason
-                }
-                save_to_sheet(sheet_name, worksheet_name, new_data)
-                st.success("✅ VE사례가 저장되었습니다.")
+        submitted = st.form_submit_button("저장하기")  # key 제거
+
+    if submitted:
+        if not all([project, work_type, ve_content, details]):
+            st.error("❌ 모든 항목을 입력해 주세요.")
+        elif result == "성공사례" and not effect:
+            st.error("❌ '절감 효과 / 개선점'을 입력해 주세요.")
+        elif result == "실패사례" and not fail_reason:
+            st.error("❌ '실패 원인'을 입력해 주세요.")
+        else:
+            new_data = {
+                "project": project,
+                "date": date_val,
+                "work_type": work_type,
+                "result": result,
+                "ve_content": ve_content,
+                "details": details,
+                "effect": effect,
+                "fail_reason": fail_reason
+            }
+            save_to_sheet(sheet_name, worksheet_name, new_data)
+            st.success("✅ VE사례가 저장되었습니다.")
+
 
 # 📅 공사기간 입력 폼
 def render_duration_form(sheet_name, worksheet_name):
