@@ -4,6 +4,8 @@ from openai import OpenAI
 from modules.form_fields import FIELD_DEFINITIONS
 from modules.gpt_extract_fields import extract_defect_fields, classify_input_type
 from modules.save_utils import save_to_sheet
+from modules.form_fields import FIELD_DEFINITIONS, FIELD_QUESTIONS
+
 
 # 💬 자연어 기반 대화형 하자사례 입력 전용 GPT 처리 함수
 def render_gpt_viewer():
