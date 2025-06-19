@@ -6,31 +6,33 @@ from modules.input_forms import (
     render_etc_form
 )
 
-# 👉 Google Sheet 기본 설정
-SHEET_NAME = "streamlit-knowledge-db"  # 구글 스프레드시트 문서명 또는 문서 ID
+# ✅ Google Sheets 문서 이름 (스프레드시트 제목)
+SHEET_NAME = "streamlit-knowledge-db"
+
+# ✅ 각 탭별 실제 시트 이름
 SHEET_TABS = {
-    "defect": "Sheet1",      # 하자사례
-    "ve": "Sheet1",          # VE사례
-    "duration": "Sheet1",    # 공사기간
-    "etc": "Sheet1"           # 기타사례
+    "defect": "하자사례",
+    "ve": "VE사례",
+    "duration": "공사기간",
+    "etc": "기타사례"
 }
 
-# ✅ Streamlit 앱 설정
+# ✅ 앱 설정
 st.set_page_config(page_title="지식순환 시스템", layout="wide")
 st.title("🏗️ 지식순환 시스템 (Google Sheets 연동)")
 
-# ✅ 탭 구성
+# ✅ 탭 UI 구성
 tab1, tab2, tab3, tab4 = st.tabs(["🔧 하자사례", "💡 VE사례", "📅 공사기간", "📁 기타사례"])
 
-# ✅ 각 탭별 입력폼 호출
+# ✅ 각 탭에서 입력 폼 호출
 with tab1:
-    render_defect_form("knowledge_db", SHEET_TABS["defect"])
+    render_defect_form(SHEET_NAME, SHEET_TABS["defect"])
 
 with tab2:
-    render_ve_form("ve_data", SHEET_TABS["ve"])
+    render_ve_form(SHEET_NAME, SHEET_TABS["ve"])
 
 with tab3:
-    render_duration_form("construction", SHEET_TABS["duration"])
+    render_duration_form(SHEET_NAME, SHEET_TABS["duration"])
 
 with tab4:
-    render_etc_form("misc_cases", SHEET_TABS["etc"])
+    render_etc_form(SHEET_NAME, SHEET_TABS["etc"])
