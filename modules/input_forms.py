@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from modules.save_utils import save_to_sheet
 
 # 🔧 하자사례 입력 폼
