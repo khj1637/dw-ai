@@ -7,12 +7,12 @@ from modules.input_forms import (
 )
 
 # 👉 Google Sheet 기본 설정
-SHEET_NAME = "streamlit-knowledge-db"  # 구글 시트 문서명 또는 문서 ID
+SHEET_NAME = "streamlit-knowledge-db"  # 구글 스프레드시트 문서명 또는 문서 ID
 SHEET_TABS = {
-    "defect": "하자사례",       # ✅ 변경됨
-    "ve": "VE사례",
-    "duration": "공사기간",
-    "etc": "기타사례"
+    "defect": "Sheet1",      # 하자사례
+    "ve": "Sheet1",          # VE사례
+    "duration": "Sheet1",    # 공사기간
+    "etc": "Sheet1"           # 기타사례
 }
 
 # ✅ Streamlit 앱 설정
@@ -24,13 +24,13 @@ tab1, tab2, tab3, tab4 = st.tabs(["🔧 하자사례", "💡 VE사례", "📅 �
 
 # ✅ 각 탭별 입력폼 호출
 with tab1:
-    render_defect_form(SHEET_NAME, SHEET_TABS["defect"])
+    render_defect_form("knowledge_db", SHEET_TABS["defect"])
 
 with tab2:
-    render_ve_form(SHEET_NAME, SHEET_TABS["ve"])
+    render_ve_form("ve_data", SHEET_TABS["ve"])
 
 with tab3:
-    render_duration_form(SHEET_NAME, SHEET_TABS["duration"])
+    render_duration_form("construction", SHEET_TABS["duration"])
 
 with tab4:
-    render_etc_form(SHEET_NAME, SHEET_TABS["etc"])
+    render_etc_form("misc_cases", SHEET_TABS["etc"])
