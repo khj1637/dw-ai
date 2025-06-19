@@ -1,0 +1,24 @@
+# 👉 Python 컴파일 파일
+__pycache__/
+*.py[cod]
+*.so
+
+# 👉 가상환경 폴더 (예: venv, .env)
+.venv/
+env/
+ENV/
+venv/
+*.env
+*.env.*
+
+# 👉 Streamlit secrets 또는 Google 인증키
+credentials/
+credentials/streamlit-knowledge-db.json
+
+# 👉 OS/에디터 임시 파일
+.DS_Store
+Thumbs.db
+*.log
+
+# 👉 Streamlit 캐시
+.streamlit/
