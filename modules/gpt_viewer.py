@@ -37,7 +37,7 @@ def classify_input_type(user_input):
                 {"role": "user", "content": user_input}
             ]
         )
-        content = response.choices[0].message.content  # ✅ 이 부분이 핵심
+        content = response.choices[0].message.content
         return json.loads(content)
     except Exception as e:
         return {"type": "오류", "message": str(e)}
@@ -77,14 +77,14 @@ def render_gpt_viewer():
     if user_input:
         st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-        # ✅ 사용자의 저장 승인 응답 처리
+        # ✅ 저장 승인 응답 처리
         if st.session_state.awaiting_confirmation and not st.session_state.user_confirmed_save:
             if user_input.strip().lower() in ["네", "예", "좋아요", "등록해", "저장해", "ㅇㅇ", "ok"]:
                 st.session_state.user_confirmed_save = True
                 st.rerun()
                 return
 
-        # 1️⃣ 첫 입력 → 유형 분류 + 항목 추출
+        # 1️⃣ 유형 분류 및 자동 추출
         if st.session_state.current_type is None:
             result = classify_input_type(user_input)
             st.session_state.current_type = result["type"]
@@ -114,22 +114,39 @@ def render_gpt_viewer():
         elif st.session_state.missing_fields:
             current_field = st.session_state.missing_fields[st.session_state.field_index]
             st.session_state.fields[current_field] = user_input
+
+            # ✅ 다음 항목이 있는 경우 질문 연결
+            next_field = (
+                st.session_state.missing_fields[st.session_state.field_index + 1]
+                if st.session_state.field_index + 1 < len(st.session_state.missing_fields)
+                else None
+            )
+
+            if next_field:
+                response_text = (
+                    f"✅ `{current_field}` 항목이 등록되었습니다.\n\n"
+                    f"이제 `{next_field}`에 대한 정보도 알려주세요."
+                )
+            else:
+                response_text = f"✅ `{current_field}` 항목까지 모두 입력되었습니다. 감사합니다!"
+
             st.session_state.chat_history.append({
                 "role": "assistant",
-                "content": f"✅ `{current_field}` 입력 완료."
+                "content": response_text
             })
+
             st.session_state.field_index += 1
             if st.session_state.field_index >= len(st.session_state.missing_fields):
                 st.session_state.missing_fields = []
             st.rerun()
 
-    # ❓ 누락 항목 입력 요청
+    # ❓ 누락 항목 질문
     if st.session_state.autofill_done and st.session_state.missing_fields:
         field = st.session_state.missing_fields[st.session_state.field_index]
         with st.chat_message("assistant"):
             st.markdown(f"❓ `{field}` 값을 입력해 주세요.")
 
-    # ✅ 모든 입력이 완료되면 저장 여부 확인
+    # ✅ 모든 항목 입력 완료 → 저장 여부 확인
     if st.session_state.autofill_done and not st.session_state.missing_fields:
         if not st.session_state.awaiting_confirmation:
             with st.chat_message("assistant"):
@@ -137,7 +154,7 @@ def render_gpt_viewer():
             st.session_state.awaiting_confirmation = True
             st.rerun()
 
-    # 💾 실제 저장 실행
+    # 💾 저장 실행
     if st.session_state.user_confirmed_save:
         with st.chat_message("assistant"):
             worksheet_map = {
@@ -159,7 +176,7 @@ def render_gpt_viewer():
             st.session_state.pop(key, None)
         st.rerun()
 
-    # 🔁 초기화 버튼
+    # 🔁 초기화
     if st.button("🔄 새로 시작"):
         for key in ["chat_history", "current_type", "fields", "missing_fields", "field_index", "autofill_done", "awaiting_confirmation", "user_confirmed_save"]:
             st.session_state.pop(key, None)
