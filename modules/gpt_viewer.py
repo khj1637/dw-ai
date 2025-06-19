@@ -5,14 +5,15 @@ from modules.form_fields import FIELD_DEFINITIONS
 from modules.gpt_extract_fields import extract_defect_fields
 from modules.save_utils import save_to_sheet
 
-# 🔐 API 키 로딩
+# 🔐 OpenAI API 키 로딩
 try:
     api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 except KeyError:
     st.error("❌ OpenAI API 키가 설정되어 있지 않습니다.")
     st.stop()
 
-# 🔍 GPT 유형 분류
+
+# 🔍 GPT 유형 분류 함수
 def classify_input_type(user_input, api_key):
     openai.api_key = api_key
     prompt = """
@@ -37,36 +38,41 @@ def classify_input_type(user_input, api_key):
                 {"role": "user", "content": user_input}
             ]
         )
-        return json.loads(response.choices[0].message["content"])
+        content = response.choices[0].message["content"]
+        return json.loads(content)
+    except (KeyError, IndexError, json.JSONDecodeError) as e:
+        return {"type": "오류", "message": f"GPT 응답 오류: {str(e)}"}
     except Exception as e:
         return {"type": "오류", "message": str(e)}
 
-# 유형별 항목 추출
+
+# ✨ 유형별 항목 추출 (하자사례만 처리)
 def extract_fields_by_type(user_input, case_type, api_key):
     if case_type == "하자사례":
         return extract_defect_fields(user_input, api_key)
     else:
-        return {"error": f"{case_type}는 아직 미지원입니다."}
+        return {
+            "error": f"{case_type} 유형은 현재 자동 추출 기능이 준비 중입니다. 수동 등록 탭을 이용해주세요."
+        }
 
-# GPT 챗봇 메인
+
+# 💬 메인 GPT 챗봇 함수
 def render_gpt_viewer():
     st.subheader("💬 지식순환 GPT (자연어 기반 등록)")
 
-    # 세션 초기화
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-    if "current_type" not in st.session_state:
-        st.session_state.current_type = None
-    if "fields" not in st.session_state:
-        st.session_state.fields = {}
-    if "missing_fields" not in st.session_state:
-        st.session_state.missing_fields = []
-    if "field_index" not in st.session_state:
-        st.session_state.field_index = 0
-    if "autofill_done" not in st.session_state:
-        st.session_state.autofill_done = False
+    # 🔁 세션 상태 초기화
+    for key, default in {
+        "chat_history": [],
+        "current_type": None,
+        "fields": {},
+        "missing_fields": [],
+        "field_index": 0,
+        "autofill_done": False
+    }.items():
+        if key not in st.session_state:
+            st.session_state[key] = default
 
-    # 📜 대화 출력
+    # 📜 대화 이력 출력
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
@@ -76,7 +82,7 @@ def render_gpt_viewer():
     if user_input:
         st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-        # 1단계: 분류 → 자동추출
+        # 1️⃣ 분류 + 항목 추출
         if st.session_state.current_type is None:
             result = classify_input_type(user_input, api_key)
             st.session_state.current_type = result["type"]
@@ -94,18 +100,20 @@ def render_gpt_viewer():
                     "role": "assistant",
                     "content": f"❌ 오류: {autofill['error']}"
                 })
-                st.experimental_rerun()
+                st.rerun()
                 return
 
             st.session_state.fields = autofill
             st.session_state.autofill_done = True
 
             required = FIELD_DEFINITIONS.get(result["type"], [])
-            st.session_state.missing_fields = [f for f in required if not autofill.get(f)]
-            st.experimental_rerun()
+            st.session_state.missing_fields = [
+                f for f in required if not autofill.get(f)
+            ]
+            st.rerun()
             return
 
-        # 2단계: 누락 항목 질문
+        # 2️⃣ 누락 항목 채우기
         elif st.session_state.missing_fields:
             current_field = st.session_state.missing_fields[st.session_state.field_index]
             st.session_state.fields[current_field] = user_input
@@ -114,23 +122,24 @@ def render_gpt_viewer():
                 "content": f"✅ `{current_field}` 입력 완료."
             })
             st.session_state.field_index += 1
+
             if st.session_state.field_index >= len(st.session_state.missing_fields):
                 st.session_state.missing_fields = []
+
             st.rerun()
             return
 
-    # 🤖 질문 출력
+    # 🤖 누락 항목 질문
     if st.session_state.autofill_done and st.session_state.missing_fields:
         field = st.session_state.missing_fields[st.session_state.field_index]
         with st.chat_message("assistant"):
             st.markdown(f"❓ `{field}` 값을 입력해 주세요.")
 
-    # 💾 저장
+    # 💾 저장 여부 확인
     if st.session_state.autofill_done and not st.session_state.missing_fields:
         with st.chat_message("assistant"):
             st.success("✅ 모든 항목이 입력되었습니다. 저장하시겠습니까?")
             if st.button("📥 저장하기"):
-                sheet_name = "knowledge_db"
                 worksheet_map = {
                     "하자사례": "defect_cases",
                     "VE사례": "ve_cases",
@@ -138,19 +147,16 @@ def render_gpt_viewer():
                     "기타사례": "misc_cases"
                 }
                 sheet = worksheet_map.get(st.session_state.current_type)
-                save_to_sheet(sheet_name, sheet, st.session_state.fields)
+                save_to_sheet("knowledge_db", sheet, st.session_state.fields)
 
-                st.success("🎉 구글 시트에 저장되었습니다!")
+                st.success("🎉 구글 시트에 저장 완료!")
                 st.session_state.chat_history.append({
                     "role": "assistant",
-                    "content": "✅ 저장 완료! 새로운 입력을 시작하려면 🔄 버튼을 눌러주세요."
+                    "content": "✅ 저장 완료! 새로운 입력을 원하시면 🔄 새로 시작을 눌러주세요."
                 })
-                st.rerun()
-                return
 
-    # 🔁 초기화
+    # 🔁 초기화 버튼
     if st.button("🔄 새로 시작"):
         for key in ["chat_history", "current_type", "fields", "missing_fields", "field_index", "autofill_done"]:
             st.session_state.pop(key, None)
         st.rerun()
-        return
