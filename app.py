@@ -19,14 +19,14 @@ SHEET_TABS = {
 
 # ✅ Streamlit 앱 설정
 st.set_page_config(page_title="지식순환 시스템", layout="wide")
-st.title("🏗️ 지식순환 시스템 (Google Sheets 연동)")
+st.title("AI기반 지식순환 시스템")
 
 # ✅ 탭 UI 구성
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🔧 하자사례",
-    "💡 VE사례",
-    "📅 공사기간",
-    "📁 기타사례"
+    "하자사례 등록",
+    "VE사례 등록",
+    "공사기간 정보등록",
+    "기타사례 등록"
 ])
 
 # ✅ 각 탭에서 입력 폼 호출 (시트 이름 기준)
