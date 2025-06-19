@@ -1,18 +1,25 @@
+import streamlit as st
 import gspread
-from google.oauth2.service_account import Credentials
 import pandas as pd
+from google.oauth2.service_account import Credentials
+import json
 
-# 구글 서비스 계정 인증
-SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-CREDS = Credentials.from_service_account_file(
-    "streamlit-knowledge-db-4c6b135fda08.json", scopes=SCOPE
-)
-CLIENT = gspread.authorize(CREDS)
+# 📌 인증 및 클라이언트 생성
+def get_gspread_client():
+    scope = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    service_account_info = json.loads(st.secrets["GCP_SERVICE_ACCOUNT"])
+    creds = Credentials.from_service_account_info(service_account_info, scopes=scope)
+    client = gspread.authorize(creds)
+    return client
 
-# 데이터 저장 함수
+# 💾 Google Sheets에 데이터 누적 저장
 def save_to_sheet(sheet_name, worksheet_name, data: dict):
     try:
-        sheet = CLIENT.open(sheet_name)
+        client = get_gspread_client()
+        sheet = client.open(sheet_name)
         worksheet = sheet.worksheet(worksheet_name)
 
         # 기존 데이터 불러오기
@@ -28,5 +35,5 @@ def save_to_sheet(sheet_name, worksheet_name, data: dict):
         worksheet.update([df.columns.values.tolist()] + df.values.tolist())
 
     except Exception as e:
-        print("[ERROR] 구글 시트 저장 오류:", e)
-        raise
+        st.error("❌ Google Sheets 저장 중 오류 발생")
+        st.exception(e)
