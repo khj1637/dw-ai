@@ -116,7 +116,7 @@ def render_gpt_viewer():
             st.session_state.field_index += 1
             if st.session_state.field_index >= len(st.session_state.missing_fields):
                 st.session_state.missing_fields = []
-            st.experimental_rerun()
+            st.rerun()
             return
 
     # 🤖 질문 출력
@@ -145,12 +145,12 @@ def render_gpt_viewer():
                     "role": "assistant",
                     "content": "✅ 저장 완료! 새로운 입력을 시작하려면 🔄 버튼을 눌러주세요."
                 })
-                st.experimental_rerun()
+                st.rerun()
                 return
 
     # 🔁 초기화
     if st.button("🔄 새로 시작"):
         for key in ["chat_history", "current_type", "fields", "missing_fields", "field_index", "autofill_done"]:
             st.session_state.pop(key, None)
-        st.experimental_rerun()
+        st.rerun()
         return
