@@ -5,14 +5,14 @@ from modules.form_fields import FIELD_DEFINITIONS
 from modules.gpt_extract_fields import extract_defect_fields
 from modules.save_utils import save_to_sheet
 
-# API 키 불러오기
+# 🔐 API 키 로딩
 try:
     api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 except KeyError:
     st.error("❌ OpenAI API 키가 설정되어 있지 않습니다.")
     st.stop()
 
-# GPT 분류
+# 🔍 GPT 유형 분류
 def classify_input_type(user_input, api_key):
     openai.api_key = api_key
     prompt = """
@@ -74,13 +74,13 @@ def render_gpt_viewer():
     # ✏️ 사용자 입력창
     user_input = st.chat_input("자연어로 사례를 입력해 주세요.")
     if user_input:
-        # ✅ 사용자 메시지 기록
         st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-        # 초기 단계: 유형 분류 및 추출
+        # 1단계: 분류 → 자동추출
         if st.session_state.current_type is None:
             result = classify_input_type(user_input, api_key)
             st.session_state.current_type = result["type"]
+
             st.session_state.chat_history.append({
                 "role": "assistant",
                 "content": f"**[{result['type']}]** {result['message']}"
@@ -95,14 +95,17 @@ def render_gpt_viewer():
                     "content": f"❌ 오류: {autofill['error']}"
                 })
                 st.experimental_rerun()
+                return
 
             st.session_state.fields = autofill
             st.session_state.autofill_done = True
 
             required = FIELD_DEFINITIONS.get(result["type"], [])
             st.session_state.missing_fields = [f for f in required if not autofill.get(f)]
+            st.experimental_rerun()
+            return
 
-        # 누락 항목 보완
+        # 2단계: 누락 항목 질문
         elif st.session_state.missing_fields:
             current_field = st.session_state.missing_fields[st.session_state.field_index]
             st.session_state.fields[current_field] = user_input
@@ -113,8 +116,8 @@ def render_gpt_viewer():
             st.session_state.field_index += 1
             if st.session_state.field_index >= len(st.session_state.missing_fields):
                 st.session_state.missing_fields = []
-
-        st.experimental_rerun()
+            st.experimental_rerun()
+            return
 
     # 🤖 질문 출력
     if st.session_state.autofill_done and st.session_state.missing_fields:
@@ -142,9 +145,12 @@ def render_gpt_viewer():
                     "role": "assistant",
                     "content": "✅ 저장 완료! 새로운 입력을 시작하려면 🔄 버튼을 눌러주세요."
                 })
+                st.experimental_rerun()
+                return
 
     # 🔁 초기화
     if st.button("🔄 새로 시작"):
         for key in ["chat_history", "current_type", "fields", "missing_fields", "field_index", "autofill_done"]:
             st.session_state.pop(key, None)
         st.experimental_rerun()
+        return
