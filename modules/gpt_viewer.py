@@ -16,22 +16,22 @@ except KeyError:
 # 🔍 GPT 유형 분류 함수
 def classify_input_type(user_input):
     system_prompt = """
-당신은 지식순환 시스템의 분류 전문가입니다.
+당신은 지식순환 시스템의 대화형 분류 전문가입니다.
 사용자의 문장을 다음 중 하나로 분류해 주세요:
 - 하자사례
 - VE사례
 - 공사기간
 - 기타사례
 
-형식은 반드시 JSON으로:
+분류 결과는 반드시 JSON 형식으로 출력하세요. 예시:
 {
-  "type": "하자사례" 또는 "VE사례" 또는 "공사기간" 또는 "기타사례",
-  "message": "간단한 이유"
+  "type": "하자사례",
+  "message": "콘크리트 균열에 대한 하자 사례입니다."
 }
 """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4",  # 필요시 gpt-3.5-turbo로 교체
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
@@ -51,7 +51,7 @@ def extract_fields_by_type(user_input, case_type):
     else:
         return {"error": f"{case_type} 유형은 현재 자동 추출 기능이 준비 중입니다."}
 
-# 💬 메인 챗봇 인터페이스
+# 💬 메인 GPT 챗봇 인터페이스
 def render_gpt_viewer():
     st.subheader("💬 지식순환 GPT (자연어 기반 등록)")
 
@@ -62,7 +62,9 @@ def render_gpt_viewer():
         "fields": {},
         "missing_fields": [],
         "field_index": 0,
-        "autofill_done": False
+        "autofill_done": False,
+        "awaiting_confirmation": False,
+        "user_confirmed_save": False
     }.items():
         if key not in st.session_state:
             st.session_state[key] = default
@@ -76,6 +78,13 @@ def render_gpt_viewer():
     user_input = st.chat_input("자연어로 사례를 입력해 주세요.")
     if user_input:
         st.session_state.chat_history.append({"role": "user", "content": user_input})
+
+        # ✅ 사용자의 저장 승인 응답 처리
+        if st.session_state.awaiting_confirmation and not st.session_state.user_confirmed_save:
+            if user_input.strip().lower() in ["네", "예", "좋아요", "등록해", "저장해", "ㅇㅇ", "ok"]:
+                st.session_state.user_confirmed_save = True
+                st.rerun()
+                return
 
         # 1️⃣ 첫 입력 → 유형 분류 + 항목 추출
         if st.session_state.current_type is None:
@@ -122,28 +131,38 @@ def render_gpt_viewer():
         with st.chat_message("assistant"):
             st.markdown(f"❓ `{field}` 값을 입력해 주세요.")
 
-    # 💾 저장
+    # ✅ 모든 입력이 완료되면 저장 여부 확인
     if st.session_state.autofill_done and not st.session_state.missing_fields:
-        with st.chat_message("assistant"):
-            st.success("✅ 모든 항목이 입력되었습니다. 저장하시겠습니까?")
-            if st.button("📥 저장하기"):
-                worksheet_map = {
-                    "하자사례": "defect_cases",
-                    "VE사례": "ve_cases",
-                    "공사기간": "construction",
-                    "기타사례": "misc_cases"
-                }
-                sheet = worksheet_map.get(st.session_state.current_type)
-                save_to_sheet("knowledge_db", sheet, st.session_state.fields)
+        if not st.session_state.awaiting_confirmation:
+            with st.chat_message("assistant"):
+                st.markdown("✅ 모든 항목이 입력되었습니다. 이대로 저장할까요? (예: '네', '저장해')")
+            st.session_state.awaiting_confirmation = True
+            st.rerun()
 
-                st.success("🎉 구글 시트에 저장 완료!")
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": "✅ 저장 완료! 새로 시작하려면 🔄 버튼을 눌러주세요."
-                })
+    # 💾 실제 저장 실행
+    if st.session_state.user_confirmed_save:
+        with st.chat_message("assistant"):
+            worksheet_map = {
+                "하자사례": "defect_cases",
+                "VE사례": "ve_cases",
+                "공사기간": "construction",
+                "기타사례": "misc_cases"
+            }
+            sheet = worksheet_map.get(st.session_state.current_type)
+            save_to_sheet("knowledge_db", sheet, st.session_state.fields)
+
+            st.success("🎉 구글 시트에 저장 완료!")
+            st.session_state.chat_history.append({
+                "role": "assistant",
+                "content": "✅ 저장 완료! 새로운 입력을 원하시면 🔄 새로 시작을 눌러주세요."
+            })
+
+        for key in ["current_type", "fields", "missing_fields", "field_index", "autofill_done", "awaiting_confirmation", "user_confirmed_save"]:
+            st.session_state.pop(key, None)
+        st.rerun()
 
     # 🔁 초기화 버튼
     if st.button("🔄 새로 시작"):
-        for key in ["chat_history", "current_type", "fields", "missing_fields", "field_index", "autofill_done"]:
+        for key in ["chat_history", "current_type", "fields", "missing_fields", "field_index", "autofill_done", "awaiting_confirmation", "user_confirmed_save"]:
             st.session_state.pop(key, None)
         st.rerun()
