@@ -1,21 +1,24 @@
 from openai import OpenAI
 import json
 
-# ✅ 공통 클라이언트 생성 함수
+# ✅ 클라이언트 생성
 def get_client(api_key):
     return OpenAI(api_key=api_key)
 
-# ✅ 1. 하자사례 항목 자동 추출 함수
+# ✅ 하자사례 항목 자동 추출 함수
 def extract_defect_fields(user_input, api_key):
     client = get_client(api_key)
 
     prompt = f"""
-다음은 건설 현장에서 발생한 하자사례입니다. 이 내용을 아래 항목에 맞게 분류해 주세요.
+당신은 건설 회사의 사례 등록을 돕는 AI 어시스턴트입니다.
 
-입력 문장:
+다음 사용자 입력은 하자사례에 대한 설명입니다. 이 내용을 분석하여 아래 항목별로 분류해 주세요.
+
+입력:
 {user_input}
 
-출력 형식 (JSON 형식):
+출력 형식은 반드시 JSON이며, 가능한 한 빈 칸 없이 추론해서 채워주세요.
+
 {{
   "현장명": "",
   "발생일": "",
@@ -29,41 +32,39 @@ def extract_defect_fields(user_input, api_key):
 """
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # 또는 gpt-4
+            model="gpt-4",  # 또는 "gpt-3.5-turbo"
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2
         )
         content = response.choices[0].message.content
-        return json.loads(content.strip())  # ⚠️ 보안상 eval 대신 json.loads
+        return json.loads(content.strip())  # 보안상 eval 대신 json.loads 사용
     except Exception as e:
         return {"error": str(e)}
 
-# ✅ 2. 사용자 입력 분류 함수 (하자사례 / VE사례 / 일반질문)
+# ✅ 입력 유형 분류 함수 (하자사례 / VE사례 / 공사기간 / 기타)
 def classify_input_type(user_input, api_key):
     client = get_client(api_key)
 
     system_prompt = """
-당신은 "지식순환 시스템"의 GPT입니다. 사용자의 자연어 입력을 아래 네 가지 중 하나로 분류해 주세요:
+당신은 지식순환 GPT입니다.
 
-- 하자사례: 건설현장에서 발생한 문제, 하자, 개선사례 등
-- VE사례: 설계 또는 시공 개선을 통해 비용 절감, 효율 개선한 사례
-- 공사기간: 건축물 또는 공정의 공사기간과 관련된 사례
-- 일반 질문: 단순한 인사, 잡담, 앱 사용 문의 등
+아래 사용자 입력을 읽고 다음 중 하나로 정확하게 분류해 주세요:
+- 하자사례
+- VE사례
+- 공사기간
+- 기타사례
 
-만약 사용자의 입력이 불완전하거나 정확히 분류하기 어려우면 추가 질문을 통해 정보를 유도하세요.  
-너무 단순한 인사말이라면 다음과 같이 안내해 주세요:  
-"안녕하세요! 하자사례, VE사례, 공사기간 관련 사례를 입력해 주시면 등록 도와드릴게요 😊"
+단순한 인삿말이나 질문일 경우 '기타사례'로 분류하고, 가능한 경우에는 대화를 자연스럽게 이어가도록 유도할 수 있는 메시지도 작성해주세요.
 
-출력은 반드시 JSON 형식으로 반환해 주세요:
-
+반드시 JSON 형식으로 출력하세요:
 {
-  "type": "하자사례" 또는 "VE사례" 또는 "공사기간" 또는 "일반 질문",
-  "message": "간단한 판단 이유 또는 유도 메시지"
+  "type": "하자사례" 또는 "VE사례" 또는 "공사기간" 또는 "기타사례",
+  "message": "판단 이유 또는 다음 질문"
 }
 """
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # 또는 gpt-4
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
