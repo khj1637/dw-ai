@@ -16,17 +16,20 @@ CREDS = Credentials.from_service_account_info(
 )
 CLIENT = gspread.authorize(CREDS)
 
-# 📄 워크시트 접근 함수
+# 📄 워크시트 접근 함수 (없으면 자동 생성)
 def get_worksheet(sheet_name: str, worksheet_name: str):
     spreadsheet = CLIENT.open(sheet_name)
-    worksheet = spreadsheet.worksheet(worksheet_name)
+    try:
+        worksheet = spreadsheet.worksheet(worksheet_name)
+    except gspread.exceptions.WorksheetNotFound:
+        worksheet = spreadsheet.add_worksheet(title=worksheet_name, rows="100", cols="20")
     return worksheet
 
 # 💾 구글 시트에 데이터 누적 저장 함수
 def save_to_sheet(sheet_name: str, worksheet_name: str, new_data: dict):
     worksheet = get_worksheet(sheet_name, worksheet_name)
 
-    # 기존 데이터 불러오기 (빈 행 제거)
+    # 기존 데이터 불러오기
     try:
         df_existing = get_as_dataframe(worksheet).dropna(how='all')
     except:
