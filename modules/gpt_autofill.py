@@ -21,4 +21,4 @@ def render_autofill():
                 for key, value in result.items():
                     st.session_state[key] = value
                 st.session_state.step = 1
-                st.experimental_rerun()
+                st.rerun()
