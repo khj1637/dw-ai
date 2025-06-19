@@ -1,9 +1,8 @@
 import streamlit as st
-import pandas as pd
-from modules.save_utils import save_csv
+from modules.save_utils import save_to_sheet
 
 # 🔧 하자사례 입력 폼
-def render_defect_form(file_path):
+def render_defect_form(sheet_name, worksheet_name):
     st.subheader("하자사례 입력")
     with st.form("form_defect"):
         project = st.text_input("현장명")
@@ -31,7 +30,7 @@ def render_defect_form(file_path):
             else:
                 new_data = {
                     "project": project,
-                    "date": date_val,
+                    "date": str(date_val),
                     "work_type": work_type,
                     "result": result,
                     "defect_content": defect_content,
@@ -39,11 +38,11 @@ def render_defect_form(file_path):
                     "solution": solution,
                     "fail_reason": fail_reason
                 }
-                save_csv(file_path, new_data)
+                save_to_sheet(sheet_name, worksheet_name, new_data)
                 st.success("✅ 하자사례가 저장되었습니다.")
 
 # 💡 VE사례 입력 폼
-def render_ve_form(file_path):
+def render_ve_form(sheet_name, worksheet_name):
     st.subheader("VE사례 입력")
     with st.form("form_ve"):
         project = st.text_input("현장명", key="ve_project")
@@ -71,7 +70,7 @@ def render_ve_form(file_path):
             else:
                 new_data = {
                     "project": project,
-                    "date": date_val,
+                    "date": str(date_val),
                     "work_type": work_type,
                     "result": result,
                     "ve_content": ve_content,
@@ -79,11 +78,11 @@ def render_ve_form(file_path):
                     "effect": effect,
                     "fail_reason": fail_reason
                 }
-                save_csv(file_path, new_data)
+                save_to_sheet(sheet_name, worksheet_name, new_data)
                 st.success("✅ VE사례가 저장되었습니다.")
 
 # 📅 공사기간 입력 폼
-def render_duration_form(file_path):
+def render_duration_form(sheet_name, worksheet_name):
     st.subheader("공사기간 입력")
     with st.form("form_duration"):
         project = st.text_input("현장명", key="duration_project")
@@ -114,11 +113,11 @@ def render_duration_form(file_path):
                     "height": height,
                     "duration": duration
                 }
-                save_csv(file_path, new_data)
+                save_to_sheet(sheet_name, worksheet_name, new_data)
                 st.success("✅ 공사기간 데이터가 저장되었습니다.")
 
 # 📁 기타사례 입력 폼
-def render_etc_form(file_path):
+def render_etc_form(sheet_name, worksheet_name):
     st.subheader("기타사례 입력")
     with st.form("form_etc"):
         project = st.text_input("현장명", key="etc_project")
@@ -133,9 +132,9 @@ def render_etc_form(file_path):
             else:
                 new_data = {
                     "project": project,
-                    "date": date_val,
+                    "date": str(date_val),
                     "etc_content": etc_content,
                     "details": details
                 }
-                save_csv(file_path, new_data)
+                save_to_sheet(sheet_name, worksheet_name, new_data)
                 st.success("✅ 기타사례가 저장되었습니다.")
