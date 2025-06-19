@@ -16,31 +16,29 @@ except KeyError:
 # 🔍 GPT 유형 분류 함수
 def classify_input_type(user_input):
     system_prompt = """
-당신은 지식순환 시스템의 대화형 분류 전문가입니다.
+당신은 지식순환 시스템의 분류 전문가입니다.
 사용자의 문장을 다음 중 하나로 분류해 주세요:
 - 하자사례
 - VE사례
 - 공사기간
 - 기타사례
 
-분류 결과는 반드시 JSON 형식으로 출력하세요. 예시:
+형식은 반드시 JSON으로:
 {
-  "type": "하자사례",
-  "message": "콘크리트 균열에 대한 하자 사례입니다."
+  "type": "하자사례" 또는 "VE사례" 또는 "공사기간" 또는 "기타사례",
+  "message": "간단한 이유"
 }
 """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",  # 필요시 gpt-3.5-turbo로 교체
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
-            ],
-            temperature=0.3
+            ]
         )
-        return json.loads(response.choices[0].message.content)
-    except (json.JSONDecodeError, KeyError, IndexError) as e:
-        return {"type": "오류", "message": f"GPT 응답 오류: {str(e)}"}
+        content = response.choices[0].message.content  # ✅ 이 부분이 핵심
+        return json.loads(content)
     except Exception as e:
         return {"type": "오류", "message": str(e)}
 
