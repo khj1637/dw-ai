@@ -1,8 +1,13 @@
-import openai
+from openai import OpenAI
+import json
+
+# ✅ 공통 클라이언트 생성 함수
+def get_client(api_key):
+    return OpenAI(api_key=api_key)
 
 # ✅ 1. 하자사례 항목 자동 추출 함수
 def extract_defect_fields(user_input, api_key):
-    openai.api_key = api_key
+    client = get_client(api_key)
 
     prompt = f"""
 다음은 건설 현장에서 발생한 하자사례입니다. 이 내용을 아래 항목에 맞게 분류해 주세요.
@@ -22,22 +27,20 @@ def extract_defect_fields(user_input, api_key):
   "실패 원인": ""
 }}
 """
-
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # 또는 gpt-4
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2
         )
-        content = response.choices[0].message["content"]
-        result = eval(content.strip())  # ⚠️ 운영 시에는 json.loads 권장
-        return result
+        content = response.choices[0].message.content
+        return json.loads(content.strip())  # ⚠️ 보안상 eval 대신 json.loads
     except Exception as e:
         return {"error": str(e)}
 
 # ✅ 2. 사용자 입력 분류 함수 (하자사례 / VE사례 / 일반질문)
 def classify_input_type(user_input, api_key):
-    openai.api_key = api_key
+    client = get_client(api_key)
 
     system_prompt = """
 당신은 지식순환 시스템을 위한 분류 전문가입니다.
@@ -54,18 +57,16 @@ def classify_input_type(user_input, api_key):
   "message": "이유나 간단 요약"
 }
 """
-
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # 또는 gpt-4
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
             ],
             temperature=0.3
         )
-        content = response.choices[0].message["content"]
-        result = eval(content.strip())  # ⚠️ 보안 강화를 위해 json.loads 권장
-        return result
+        content = response.choices[0].message.content
+        return json.loads(content.strip())
     except Exception as e:
         return {"type": "오류", "message": str(e)}
