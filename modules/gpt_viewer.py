@@ -8,12 +8,11 @@ from modules.gpt_extract_fields import extract_defect_fields  # 필요시 확장
 from modules.save_utils import save_to_sheet
 
 try:
-    api_key = st.secrets["OPENAI"]["API_KEY"]
+    api_key = st.secrets["OPENAI_API_KEY"]
+
 except KeyError:
     st.error("❌ OpenAI API 키가 설정되어 있지 않습니다.")
     st.stop()
-
-api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 
 # GPT 유형 분류 함수
 def classify_input_type(user_input, api_key):
