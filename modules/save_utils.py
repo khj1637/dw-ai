@@ -1,39 +1,41 @@
-import streamlit as st
-from google.oauth2.service_account import Credentials
 import gspread
 import pandas as pd
+from google.oauth2.service_account import Credentials
+from gspread_dataframe import get_as_dataframe, set_with_dataframe
+import streamlit as st
 
-# ✅ gspread 클라이언트 생성
-def get_gspread_client():
-    scope = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
-    creds_dict = st.secrets["GCP_SERVICE_ACCOUNT"]
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-    client = gspread.authorize(creds)
-    return client
+# 🔐 구글 서비스 계정 인증
+SCOPE = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
-# ✅ 시트 객체 가져오기
+CREDS = Credentials.from_service_account_info(
+    st.secrets["GCP_SERVICE_ACCOUNT"], scopes=SCOPE
+)
+CLIENT = gspread.authorize(CREDS)
+
+# 📄 워크시트 접근 함수
 def get_worksheet(sheet_name: str, worksheet_name: str):
-    client = get_gspread_client()
-    spreadsheet = client.open(sheet_name)
+    spreadsheet = CLIENT.open(sheet_name)
     worksheet = spreadsheet.worksheet(worksheet_name)
     return worksheet
 
-# ✅ 데이터 누적 저장 함수
+# 💾 구글 시트에 데이터 누적 저장 함수
 def save_to_sheet(sheet_name: str, worksheet_name: str, new_data: dict):
     worksheet = get_worksheet(sheet_name, worksheet_name)
 
+    # 기존 데이터 불러오기 (빈 행 제거)
     try:
-        existing = worksheet.get_all_records()
-        df_existing = pd.DataFrame(existing)
-    except Exception:
+        df_existing = get_as_dataframe(worksheet).dropna(how='all')
+    except:
         df_existing = pd.DataFrame()
 
+    # 새로운 데이터 추가
     new_row = pd.DataFrame([new_data])
     df_combined = pd.concat([df_existing, new_row], ignore_index=True)
 
-    # 시트 전체 초기화 후 업데이트
+    # 기존 내용 초기화 후 저장
     worksheet.clear()
-    worksheet.update([df_combined.columns.values.tolist()] + df_combined.values.tolist())
+    set_with_dataframe(worksheet, df_combined)
