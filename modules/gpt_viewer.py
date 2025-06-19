@@ -1,93 +1,84 @@
 import streamlit as st
-from modules.save_utils import save_to_sheet
-from modules.gpt_extract_fields import extract_defect_fields
 import datetime
+from modules.gpt_extract_fields import extract_defect_fields  # 추후 활용
+from modules.save_utils import save_to_sheet
+import openai
 
-# 필수 항목 체크 함수
-def all_required_fields_filled(state):
-    required = ["project", "date_val", "work_type", "defect_content", "details", "result"]
-    if not all(state.get(f) for f in required):
-        return False
-    if state["result"] == "성공사례":
-        return bool(state.get("solution"))
-    else:
-        return bool(state.get("fail_reason"))
+# GPT 유형 분류 함수
+def classify_input_type(user_input, api_key):
+    openai.api_key = api_key
 
-# GPT 기반 지식순환 입력 탭
+    system_prompt = """
+다음 사용자 문장을 분석해서 아래 유형 중 하나로 분류하세요:
+- 하자사례
+- VE사례
+- 일반 질문 (저장 불필요)
+
+출력 형식은 반드시 JSON으로:
+{
+  "type": "하자사례" 또는 "VE사례" 또는 "일반 질문",
+  "message": "분류에 대한 간단한 설명 또는 요약"
+}
+"""
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input}
+        ],
+        temperature=0.3
+    )
+
+    content = response.choices[0].message["content"]
+    try:
+        result = eval(content.strip())  # 안전한 버전은 json.loads 사용
+        return result
+    except Exception as e:
+        return {"type": "오류", "message": str(e)}
+
+# 메인 뷰어
 def render_gpt_viewer():
-    st.subheader("🧠 지식순환 GPT (정보 등록)")
-    st.markdown("자연어로 하자사례를 입력하면, GPT가 자동으로 항목을 분류하고 저장을 도와줍니다.")
-
-    # 초기화 버튼
-    if st.button("초기화"):
-        for key in st.session_state.keys():
-            del st.session_state[key]
-        st.experimental_rerun()
-
-    # API 키 입력
+    st.subheader("💬 지식순환 GPT (자연어 챗봇)")
     api_key = st.secrets.get("OPENAI_API_KEY") or st.text_input("OpenAI API Key", type="password")
 
-    # 단계 초기화
-    if "step" not in st.session_state:
-        st.session_state.step = 0
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-    # STEP 0: 자연어 입력
-    if st.session_state.step == 0:
-        user_input = st.text_area("📌 하자사례를 자연어로 입력해주세요.")
-        if st.button("1️⃣ GPT로 항목 추출하기") and user_input and api_key:
-            with st.spinner("GPT가 항목을 분석 중입니다..."):
-                result = extract_defect_fields(user_input, api_key)
-                if "error" in result:
-                    st.error("❌ 오류 발생: " + result["error"])
-                    return
-                # 결과 세션에 저장
-                for key, val in result.items():
-                    st.session_state[key] = val
-                st.session_state.step = 1
-                st.experimental_rerun()
+    user_input = st.chat_input("궁금한 점이나 사례를 자유롭게 입력하세요.")
+    if user_input and api_key:
+        # 사용자 메시지 저장
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-    # STEP 1: 항목 보완 입력
-    elif st.session_state.step == 1:
-        st.info("🔍 부족한 정보를 확인하고 입력해주세요.")
-        st.session_state.project = st.text_input("현장명", st.session_state.get("project", ""))
-        st.session_state.date_val = st.date_input("발생일", value=st.session_state.get("date_val", datetime.date.today()))
-        st.session_state.work_type = st.text_input("공종", st.session_state.get("work_type", ""))
-        st.session_state.result = st.radio("사례 결과", ["성공사례", "실패사례"], index=0 if st.session_state.get("result") == "성공사례" else 1)
-        st.session_state.defect_content = st.text_input("하자 내용", st.session_state.get("defect_content", ""))
-        st.session_state.details = st.text_area("상세 내용", st.session_state.get("details", ""))
+        # GPT 분류
+        with st.spinner("GPT가 분석 중입니다..."):
+            result = classify_input_type(user_input, api_key)
 
-        if st.session_state.result == "성공사례":
-            st.session_state.solution = st.text_input("해결 방안", st.session_state.get("solution", ""))
+        # GPT 응답 저장
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": f"[{result['type']}] {result['message']}"
+        })
+
+        # 이후 단계 분기 준비
+        if result["type"] == "하자사례":
+            st.session_state.register_type = "defect"
+        elif result["type"] == "VE사례":
+            st.session_state.register_type = "ve"
         else:
-            st.session_state.fail_reason = st.text_input("실패 원인", st.session_state.get("fail_reason", ""))
+            st.session_state.register_type = None
 
-        if all_required_fields_filled(st.session_state):
-            st.success("✅ 모든 항목이 입력되었습니다.")
-            if st.button("2️⃣ GPT: 지식저장소에 저장할까요?"):
-                st.session_state.step = 2
-                st.experimental_rerun()
-        else:
-            st.warning("⚠️ 아직 모든 항목이 입력되지 않았습니다.")
+        st.experimental_rerun()
 
-    # STEP 2: 사용자 승인 후 저장
-    elif st.session_state.step == 2:
-        st.info("📦 GPT가 제안합니다: 이 정보를 지식저장소(Google Sheets)에 저장할까요?")
-        if st.button("예, 저장할게요"):
-            row = {
-                "현장명": st.session_state.project,
-                "발생일": str(st.session_state.date_val),
-                "공종": st.session_state.work_type,
-                "사례 결과": st.session_state.result,
-                "하자 내용": st.session_state.defect_content,
-                "상세 내용": st.session_state.details,
-                "해결 방안": st.session_state.solution if st.session_state.result == "성공사례" else "",
-                "실패 원인": st.session_state.fail_reason if st.session_state.result == "실패사례" else ""
-            }
-            save_to_sheet("knowledge_db", "defect_cases", row)
-            st.success("✅ 저장이 완료되었습니다!")
-            st.session_state.step = 3
-            st.experimental_rerun()
+    # 채팅 이력 출력
+    for msg in st.session_state.chat_history:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-    # STEP 3: 완료
-    elif st.session_state.step == 3:
-        st.success("🎉 사례가 저장되었습니다. 새 입력을 원하시면 '초기화'를 눌러주세요.")
+    # 다음 흐름 안내
+    if st.session_state.get("register_type") == "defect":
+        st.info("➡️ GPT가 하자사례로 판단했습니다. 항목 추출 및 저장 화면으로 전환합니다.")
+        # 여기에 render_defect_flow() 등 연결 가능
+    elif st.session_state.get("register_type") == "ve":
+        st.info("➡️ GPT가 VE사례로 판단했습니다. VE 등록 화면으로 전환합니다.")
+        # 추후 render_ve_flow() 연결
