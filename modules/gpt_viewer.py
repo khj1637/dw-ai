@@ -7,7 +7,7 @@ from modules.save_utils import save_to_sheet
 
 # 🔐 API 키 로딩
 try:
-    api_key = st.secrets["OPENAI"]["API_KEY"]
+    api_key = st.secrets["OPENAI"]["OPENAI_API_KEY"]
 except KeyError:
     st.error("❌ OpenAI API 키가 설정되어 있지 않습니다.")
     st.stop()
