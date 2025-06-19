@@ -1,6 +1,6 @@
 from modules.gpt_extract_fields import extract_defect_fields
 
-def render_gpt_viewer():
+def render_autofill():
     st.subheader("🧠 지식순환 GPT (정보 등록)")
 
     api_key = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else st.text_input("OpenAI API Key", type="password")
