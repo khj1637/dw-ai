@@ -7,6 +7,11 @@ from modules.form_fields import FIELD_DEFINITIONS
 from modules.gpt_extract_fields import extract_defect_fields  # 필요시 확장
 from modules.save_utils import save_to_sheet
 
+try:
+    api_key = st.secrets["OPENAI"]["API_KEY"]
+except KeyError:
+    st.error("❌ OpenAI API 키가 설정되어 있지 않습니다.")
+    st.stop()
 
 # GPT 유형 분류 함수
 def classify_input_type(user_input, api_key):
@@ -52,8 +57,6 @@ def extract_fields_by_type(user_input, case_type, api_key):
 # 메인 함수
 def render_gpt_viewer():
     st.subheader("💬 지식순환 GPT (자연어 기반 등록)")
-
-    api_key = st.secrets.get("OPENAI_API_KEY") or st.text_input("OpenAI API Key", type="password")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
