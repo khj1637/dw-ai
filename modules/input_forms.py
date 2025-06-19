@@ -80,7 +80,7 @@ def render_ve_form(sheet_name, worksheet_name):
                 }
                 save_to_sheet(sheet_name, worksheet_name, new_data)
                 st.success("✅ VE사례가 저장되었습니다.")
-
+                
 # 📅 공사기간 입력 폼
 def render_duration_form(sheet_name, worksheet_name):
     st.subheader("공사기간 입력")
