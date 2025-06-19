@@ -5,7 +5,7 @@ from modules.input_forms import (
     render_duration_form,
     render_etc_form
 )
-from modules.gpt_viewer import render_gpt_viewer  # 🧠 지식순환 GPT 탭 함수
+from modules.gpt_autofill import render_autofill  # 🧠 지식순환 GPT 탭 함수
 
 # ✅ Google Sheets 문서명 (모든 워크시트가 이 문서 안에 있음)
 SHEET_NAME = "knowledge_db"
