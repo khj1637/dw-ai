@@ -7,6 +7,7 @@ from modules.form_fields import FIELD_DEFINITIONS
 from modules.gpt_extract_fields import extract_defect_fields  # 필요시 확장
 from modules.save_utils import save_to_sheet
 
+
 # GPT 유형 분류 함수
 def classify_input_type(user_input, api_key):
     openai.api_key = api_key
