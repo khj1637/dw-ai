@@ -5,7 +5,6 @@ from modules.input_forms import (
     render_duration_form,
     render_etc_form
 )
-from modules.gpt_viewer import render_gpt_viewer  # 통합된 챗봇 + 자동 입력 처리 함수
 
 # ✅ Google Sheets 문서명
 SHEET_NAME = "knowledge_db"
@@ -23,17 +22,12 @@ st.set_page_config(page_title="지식순환 시스템", layout="wide")
 st.title("AI기반 지식순환 시스템")
 
 # ✅ 탭 구성 (GPT 탭 포함)
-tab_gpt, tab1, tab2, tab3, tab4 = st.tabs([
-    "지식순환 GPT",  # 🧠 GPT 기반 자동 입력
+tab1, tab2, tab3, tab4 = st.tabs([
     "하자사례 등록",
     "VE사례 등록",
     "공사기간 정보등록",
     "기타사례 등록"
 ])
-
-# ✅ 탭별 콘텐츠 연결
-with tab_gpt:
-    render_gpt_viewer()  # GPT 챗봇 + 자동추출 + 저장 연동
 
 with tab1:
     render_defect_form(SHEET_NAME, SHEET_TABS["defect"])
