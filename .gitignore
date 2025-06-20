@@ -22,3 +22,6 @@ Thumbs.db
 
 # 👉 Streamlit 캐시
 .streamlit/
+
+# 민감한 정보
+secrets.toml
