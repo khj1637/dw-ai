@@ -50,7 +50,7 @@ def render_defect_form(sheet_name, worksheet_name):
 
 # 💡 VE사례 입력 폼
 def render_ve_form(sheet_name, worksheet_name):
-    st.subheader("💡 VE사례 입력")
+    st.subheader("VE사례 입력")
     with st.form(key="ve_form"):
         project = st.text_input("현장명", key="ve_project")
         date_val = st.date_input("적용일", key="ve_date")
@@ -97,7 +97,7 @@ def render_ve_form(sheet_name, worksheet_name):
 
 # 📅 공사기간 입력 폼
 def render_duration_form(sheet_name, worksheet_name):
-    st.subheader("📅 공사기간 입력")
+    st.subheader("공사기간 입력")
     with st.form(key="duration_form"):
         project = st.text_input("현장명", key="duration_project")
         usage = st.text_input("용도", key="duration_usage")
@@ -140,7 +140,7 @@ def render_duration_form(sheet_name, worksheet_name):
 
 # 📁 기타사례 입력 폼
 def render_etc_form(sheet_name, worksheet_name):
-    st.subheader("📁 기타사례 입력")
+    st.subheader("기타사례 입력")
     with st.form(key="etc_form"):
         project = st.text_input("현장명", key="etc_project")
         date_val = st.date_input("등록일", key="etc_date")
