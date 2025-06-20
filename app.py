@@ -18,9 +18,31 @@ SHEET_TABS = {
 }
 
 # ✅ Streamlit 설정
-st.set_page_config(page_title="지식순환 시스템")
-st.title("AI기반 지식순환 시스템")
+st.set_page_config(page_title="동원건설산업 지식정보 저장소")
+st.markdown(
+    """
+    <div style="text-align: center; margin-bottom: 5px;">
+        <img src="https://raw.githubusercontent.com/khj1637/dw-workday-ai/main/img/logo.png"
+             alt="DongwonCI"
+             width="180"
+             style="display: block; margin: auto; padding-bottom: 5px;">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
+st.markdown(
+    """
+    <h1 style='text-align: center;'>Knowledge Collector</h1>
+    <div style='height: 20px;'></div>  <!-- 공백 한 줄 -->
+    <p style='text-align: left; font-size: 0.85rem; color: #555;'>
+        버전: v1.0.0<br>
+        최종 업데이트: 2025년 6월 17일<br>
+        개발자 : 동원건설산업 기술팀 김혁진
+    </p>
+    """,
+    unsafe_allow_html=True
+)
 # ✅ 탭 구성 (GPT 탭 포함)
 tab1, tab2, tab3, tab4 = st.tabs([
     "하자사례 등록",
