@@ -21,18 +21,6 @@ SHEET_TABS = {
 st.set_page_config(page_title="동원건설산업 지식정보 저장소")
 st.markdown(
     """
-    <div style="text-align: center; margin-bottom: 5px;">
-        <img src="https://raw.githubusercontent.com/khj1637/dw-workday-ai/main/img/logo.png"
-             alt="DongwonCI"
-             width="180"
-             style="display: block; margin: auto; padding-bottom: 5px;">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
     <h1 style='text-align: center;'>Knowledge Collector</h1>
     <div style='height: 20px;'></div>  <!-- 공백 한 줄 -->
     <p style='text-align: left; font-size: 0.85rem; color: #555;'>
