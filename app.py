@@ -18,7 +18,7 @@ SHEET_TABS = {
 }
 
 # ✅ Streamlit 설정
-st.set_page_config(page_title="지식순환 시스템", layout="wide")
+st.set_page_config(page_title="지식순환 시스템")
 st.title("AI기반 지식순환 시스템")
 
 # ✅ 탭 구성 (GPT 탭 포함)
